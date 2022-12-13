@@ -22,13 +22,10 @@ function onInputText() {
 }
 
 function reviseWritingCountry(country) {
-    if (!country) {
-        return Notify.failure('Oops, there is no country with that name');
+    if (search.value.length === 0) {
+        console.log(1)
+        return Notify.info('Please start entering some country for searching');
       }
-      
-  if (search.value.length === 0) {
-    return Notify.info('Please start entering some country for searching');
-  }
 }
 
 
