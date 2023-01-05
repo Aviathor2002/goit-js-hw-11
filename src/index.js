@@ -1,75 +1,27 @@
 import './css/styles.css';
 import debounce from 'lodash.debounce';
 import { Notify } from 'notiflix';
-import { fetchCountries } from './fetch';
+const axios = require('axios').default;
+import { PicturesAPI } from './fetch';
 
 const DEBOUNCE_DELAY = 300;
 
-const search = document.querySelector('#search-box');
-const countryInfoList = document.querySelector(`.country-list`);
-const oneCountryInfoCard = document.querySelector('.country-info');
+const search = document.querySelector('#search-form');
+const gallery = document.querySelector(`.gallery`);
 
-search.addEventListener('input', debounce(onInputText, DEBOUNCE_DELAY));
+const pictureAPI = new PicturesAPI();
 
-function onInputText() {
-  countryInfoList.innerHTML = '';
-  oneCountryInfoCard.innerHTML = '';
+search.addEventListener(`submit`, onFormSubmit);
 
-  const searchCuntry = search.value.trim();
+function onFormSubmit(e) {
+  e.preventDefault();
 
-  reviseWritingCountry(searchCuntry);
-  reviseCountCountriesRender(searchCuntry);
-}
+  pictureAPI.query = e.currentTarget.elements.searchQuery.value.trim();
+  if (pictureAPI.query === '') {
+    return Notify.warning('Enter somathing');
+  }
 
-function reviseWritingCountry(country) {
-    if (search.value.length === 0) {
-        console.log(1)
-        return Notify.info('Please start entering some country for searching');
-      }
-}
+  pictureAPI.restPage();
 
-
-function reviseCountCountriesRender(country) {
-  fetchCountries(country)
-    .then(data => {
-      if (data.length > 10) {
-        return Notify.info(
-          'Too many matches found. Please enter a more specific name.'
-        );
-      } else if (data.length >= 2 && data.length <= 10) {
-        return renderCountryCards(data);
-      } else {
-        return renderOneCountryCard(data);
-      }
-    })
-    .catch(error => console.log(error));
-}
-
-function renderOneCountryCard(country) {
-  oneCountryInfoCard.innerHTML = '';
-
-  const card = country.map(
-    ({ name, capital, population, flags, languages }) => {
-      return `<img class='big_img' src="${flags.svg}" alt="flag">
-        <h1 >${name.official}</h1>
-        <P><span class="title">Capital:</span> ${capital}</P>
-        <P><span class="title">Population:</span> ${population}</P>
-        <P><span class="title">Languages:</span> ${Object.values(
-          languages
-        )}</P>`;
-    }
-  );
-  oneCountryInfoCard.insertAdjacentHTML('beforeend', card.join(''));
-}
-
-function renderCountryCards(countries) {
-  countryInfoList.innerHTML = '';
-
-  const cards = countries.map(({ name, flags }) => {
-    return ` <li class="item" >
-    <img src="${flags.svg}" alt="flag">
-    <p>${name.official}</p>
-  </li>`;
-  });
-  countryInfoList.insertAdjacentHTML('beforeend', cards.join(''));
+  pictureAPI.fetchGallery().then(data => console.log(data));
 }
